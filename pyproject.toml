@@ -3,7 +3,7 @@ name = "odl-ingestion"
 version = "0.1.0"
 description = "Ingestion foundation for Open Data Lakehouse Lab"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 license = {text = "Apache-2.0"}
 dependencies = [
     "httpx",
@@ -17,6 +17,7 @@ dev = [
     "pytest",
     "ruff",
     "mypy",
+    "respx",
 ]
 
 [project.scripts]
@@ -28,10 +29,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py312"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 
