@@ -1,0 +1,23 @@
+# Configuration Guide
+
+## Local Configuration
+
+The ingestion tool can be configured via command-line arguments or environment variables.
+
+### Environment Variables
+
+- `CATALOG_PATH`: Path to the dataset catalog repository (default: `../datasets-catalog`).
+- `OUTPUT_DIR`: Directory where ingested data will be stored (default: `./data`).
+- `METEOCAT_API_KEY`: API key for the Meteocat connector (must NOT be committed).
+
+## API Keys
+
+Security is a priority. Never commit API keys, tokens, or any other credentials to the repository. Use environment variables or a local `.env` file (which is ignored by git).
+
+## Output Layout
+
+The local writer uses a deterministic layout:
+
+```
+<output_dir>/landing/<category>/<source>/<dataset_id>/ingestion_date=YYYY-MM-DD/sample.json
+```

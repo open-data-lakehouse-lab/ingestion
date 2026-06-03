@@ -1,5 +1,70 @@
-# ingestion
+# Open Data Lakehouse - Ingestion
+
 Data ingestion repository containing source connectors, ingestion jobs, validation logic and writers for local and cloud-like storage targets.
+
+## Overview
+
+This repository is responsible for the ingestion layer of the Open Data Lakehouse Lab. It handles fetching data from various public sources and persisting it to landing zones.
+
+### M1 - Weather Ingestion MVP
+
+The current scope is focusing on the Weather Ingestion MVP.
+Selected MVP dataset: `meteocat-weather`.
+
+**Note:** The current implementation uses placeholder sample extraction. Real API ingestion will be implemented in future phases.
+
+## Installation
+
+### Development Setup
+
+1. Install development dependencies:
+   ```bash
+   python3 -m pip install -r requirements-dev.txt
+   ```
+
+2. Install the package in editable mode:
+   ```bash
+   python3 -m pip install -e .
+   ```
+
+## Usage
+
+### CLI Commands
+
+Check the version:
+```bash
+odl-ingestion version
+```
+
+List available datasets from the catalog:
+```bash
+odl-ingestion datasets list --catalog-path ../datasets-catalog
+```
+
+Show dataset details:
+```bash
+odl-ingestion datasets show meteocat-weather --catalog-path ../datasets-catalog
+```
+
+Run placeholder local ingestion:
+```bash
+odl-ingestion ingest --dataset meteocat-weather --catalog-path ../datasets-catalog --target local --output-dir ./data
+```
+
+**Note:** Even though placeholder ingestion does not make real HTTP requests yet, it still requires the dataset metadata to exist in the provided catalog path.
+
+## Validation and Testing
+
+Run the validation script (includes Ruff, Mypy, and Pytest):
+```bash
+bash scripts/validate.sh
+```
+
+## Documentation
+
+- [Ingestion Design](docs/ingestion-design.md)
+- [Configuration](docs/configuration.md)
+- [Meteocat Connector Plan](docs/meteocat-connector-plan.md)
 
 ## License
 

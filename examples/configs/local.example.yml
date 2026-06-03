@@ -1,0 +1,4 @@
+catalog_path: ../datasets-catalog
+target: local
+output_dir: ./data
+dataset_id: meteocat-weather

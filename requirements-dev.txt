@@ -1,0 +1,7 @@
+pytest
+ruff
+mypy
+httpx
+pydantic
+PyYAML
+typer
