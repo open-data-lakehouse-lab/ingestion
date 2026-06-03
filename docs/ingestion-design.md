@@ -27,7 +27,11 @@ To facilitate development and testing, the system supports a local-first ingesti
 
 ## Real-world Ingestion
 
-The system supports real-world ingestion through opt-in modes. The first implemented real-world resource is Meteocat `stations-metadata`, which requires a valid `METEOCAT_API_KEY`.
+The system supports real-world ingestion through opt-in modes. Implemented real-world resources for Meteocat:
+- `stations-metadata`: General information about weather stations.
+- `measured-variable`: Values measured by variables (e.g., temperature, humidity) for all stations or a specific station.
+
+Real mode requires a valid `METEOCAT_API_KEY`.
 
 ## Future Evolution
 

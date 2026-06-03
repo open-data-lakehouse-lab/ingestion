@@ -20,5 +20,9 @@ Security is a priority. Never commit API keys, tokens, or any other credentials 
 The local writer uses a deterministic layout:
 
 ```
-<output_dir>/landing/<category>/<source>/<dataset_id>/ingestion_date=YYYY-MM-DD/sample.json
+<output_dir>/landing/<category>/<source>/<dataset_id>/ingestion_date=YYYY-MM-DD/<filename>.json
 ```
+
+- For `sample` mode: `sample.json`
+- For `stations-metadata` resource: `stations-metadata.json`
+- For `measured-variable` resource: `measured-variable.json`

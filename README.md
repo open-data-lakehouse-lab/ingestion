@@ -59,6 +59,8 @@ odl-ingestion ingest \
 ```
 
 Run real ingestion (requires `METEOCAT_API_KEY`):
+
+**Stations Metadata:**
 ```bash
 export METEOCAT_API_KEY="replace-me"
 odl-ingestion ingest \
@@ -70,11 +72,34 @@ odl-ingestion ingest \
   --meteocat-resource stations-metadata
 ```
 
+**Measured Variable:**
+```bash
+export METEOCAT_API_KEY="replace-me"
+odl-ingestion ingest \
+  --dataset meteocat-weather \
+  --catalog-path ../datasets-catalog \
+  --target local \
+  --output-dir ./data \
+  --mode real \
+  --meteocat-resource measured-variable \
+  --variable-code 32 \
+  --year 2026 \
+  --month 6 \
+  --day 3
+```
+
 Options for real mode:
 - `--mode`: `sample` (default) or `real`.
-- `--meteocat-resource`: `stations-metadata` (default).
-- `--station-status`: Filter by station status (default: `all`).
-- `--metadata-date`: Filter by metadata date (YYYY-MM-DD).
+- `--meteocat-resource`: `stations-metadata` (default) or `measured-variable`.
+- For `stations-metadata`:
+    - `--station-status`: Filter by station status (default: `all`).
+    - `--metadata-date`: Filter by metadata date (YYYY-MM-DD).
+- For `measured-variable`:
+    - `--variable-code`: Variable code (required).
+    - `--year`: Year (required).
+    - `--month`: Month (required).
+    - `--day`: Day (required).
+    - `--station-code`: Station code (optional).
 
 **Note:** The default mode is `sample`. Real mode is opt-in and requires a valid API key.
 

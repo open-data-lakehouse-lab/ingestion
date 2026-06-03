@@ -58,7 +58,12 @@ def ingest(
     mode: str = typer.Option("sample", "--mode", help="Ingestion mode (sample or real)"),
     meteocat_resource: str = typer.Option("stations-metadata", "--meteocat-resource", help="Meteocat resource to ingest"),
     station_status: str = typer.Option("all", "--station-status", help="Filter by station status"),
-    metadata_date: Optional[str] = typer.Option(None, "--metadata-date", help="Metadata date (YYYY-MM-DD)")
+    metadata_date: Optional[str] = typer.Option(None, "--metadata-date", help="Metadata date (YYYY-MM-DD)"),
+    variable_code: Optional[str] = typer.Option(None, "--variable-code", help="Variable code for measured data"),
+    year: Optional[int] = typer.Option(None, "--year", help="Year for measured data"),
+    month: Optional[int] = typer.Option(None, "--month", help="Month for measured data"),
+    day: Optional[int] = typer.Option(None, "--day", help="Day for measured data"),
+    station_code: Optional[str] = typer.Option(None, "--station-code", help="Station code for measured data")
 ) -> None:
     """Run ingestion for a dataset."""
     # Load catalog to verify dataset exists
@@ -99,6 +104,27 @@ def ingest(
                     metadata_date=metadata_date
                 )
                 filename = "stations-metadata.json"
+            elif meteocat_resource == "measured-variable":
+                if not all([variable_code, year, month, day]):
+                    typer.echo("Error: --variable-code, --year, --month and --day are required for measured-variable resource.", err=True)
+                    raise typer.Exit(code=1)
+                
+                typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
+                # We know they are not None because of the check above, but for type checker:
+                assert variable_code is not None
+                assert year is not None
+                assert month is not None
+                assert day is not None
+
+                data = connector.extract_measured_variable(
+                    api_key=api_key,
+                    variable_code=variable_code,
+                    year=year,
+                    month=month,
+                    day=day,
+                    station_code=station_code
+                )
+                filename = "measured-variable.json"
             else:
                 typer.echo(f"Error: Meteocat resource '{meteocat_resource}' is not supported.", err=True)
                 raise typer.Exit(code=1)

@@ -57,3 +57,27 @@ class MeteocatConnector(BaseConnector):
             response.raise_for_status()
             data: Dict[str, Any] = response.json()
             return data
+
+    def extract_measured_variable(
+        self,
+        api_key: str,
+        variable_code: str,
+        year: int,
+        month: int,
+        day: int,
+        station_code: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Extract measured variable data from Meteocat API.
+        """
+        url = f"{self.base_url}/variables/mesurades/{variable_code}/{year}/{month}/{day}"
+        headers = {"x-api-key": api_key}
+        params = {}
+        if station_code:
+            params["codiEstacio"] = station_code
+
+        with httpx.Client() as client:
+            response = client.get(url, headers=headers, params=params, timeout=10.0)
+            response.raise_for_status()
+            data: Dict[str, Any] = response.json()
+            return data
