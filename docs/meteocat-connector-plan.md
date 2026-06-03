@@ -1,18 +1,18 @@
 # Meteocat Connector Plan
 
-## Status: Skeleton
+## Status: Real mode for station metadata (Opt-in)
 
-The Meteocat connector is currently in a skeleton state. It provides a placeholder `extract_sample()` method that returns static data for testing the ingestion flow.
+The Meteocat connector supports both a safe offline `sample` mode and a real opt-in mode for `stations-metadata`.
 
-## Implementation Steps
+## Implementation Progress
 
-1. **Endpoint Selection**: Identify the most relevant Meteocat API endpoints for the MVP (e.g., current weather observations).
-2. **Authentication**: Implement secure API key handling using the `METEOCAT_API_KEY` environment variable.
-3. **Extraction Logic**: Use `httpx` to perform real API requests.
-4. **Partitioning**: Implement date-based partitioning if the API supports it.
-5. **Error Handling**: Add robust handling for rate limits, network timeouts, and API errors.
-6. **Schema Mapping**: Map Meteocat API responses to a standardized internal format.
+1. **Endpoint Selection**: Identified `stations-metadata` as the first real endpoint. ✓
+2. **Authentication**: Implemented `x-api-key` header using the `METEOCAT_API_KEY` environment variable. ✓
+3. **Extraction Logic**: Uses `httpx` to perform real API requests. ✓
+4. **Partitioning**: Station metadata supports optional date filtering. ✓
+5. **Error Handling**: Uses `response.raise_for_status()` for clear HTTP errors. ✓
+6. **Schema Mapping**: Currently returns raw JSON; future mapping to standardized internal format is planned.
 
 ## Verification
 
-Before moving to production, real API behavior must be validated against expected schemas and data quality standards.
+Real API behavior depends on Meteocat API access and limits. Tests use mocks and do not require network or real secrets.

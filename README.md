@@ -46,12 +46,37 @@ Show dataset details:
 odl-ingestion datasets show meteocat-weather --catalog-path ../datasets-catalog
 ```
 
-Run placeholder local ingestion:
+### Ingestion
+
+Run sample ingestion (safe, offline, no API key required):
 ```bash
-odl-ingestion ingest --dataset meteocat-weather --catalog-path ../datasets-catalog --target local --output-dir ./data
+odl-ingestion ingest \
+  --dataset meteocat-weather \
+  --catalog-path ../datasets-catalog \
+  --target local \
+  --output-dir ./data \
+  --mode sample
 ```
 
-**Note:** Even though placeholder ingestion does not make real HTTP requests yet, it still requires the dataset metadata to exist in the provided catalog path.
+Run real ingestion (requires `METEOCAT_API_KEY`):
+```bash
+export METEOCAT_API_KEY="replace-me"
+odl-ingestion ingest \
+  --dataset meteocat-weather \
+  --catalog-path ../datasets-catalog \
+  --target local \
+  --output-dir ./data \
+  --mode real \
+  --meteocat-resource stations-metadata
+```
+
+Options for real mode:
+- `--mode`: `sample` (default) or `real`.
+- `--meteocat-resource`: `stations-metadata` (default).
+- `--station-status`: Filter by station status (default: `all`).
+- `--metadata-date`: Filter by metadata date (YYYY-MM-DD).
+
+**Note:** The default mode is `sample`. Real mode is opt-in and requires a valid API key.
 
 ## Validation and Testing
 

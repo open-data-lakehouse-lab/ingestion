@@ -23,7 +23,11 @@ Writers inherit from `BaseWriter`, allowing the same data to be written to local
 
 ### Local-first Ingestion
 
-To facilitate development and testing, the system supports a local-first ingestion flow where data is written to a local directory structure mimicking a cloud landing zone.
+To facilitate development and testing, the system supports a local-first ingestion flow where data is written to a local directory structure mimicking a cloud landing zone. It also supports a safe offline `sample` mode as the default behavior.
+
+## Real-world Ingestion
+
+The system supports real-world ingestion through opt-in modes. The first implemented real-world resource is Meteocat `stations-metadata`, which requires a valid `METEOCAT_API_KEY`.
 
 ## Future Evolution
 

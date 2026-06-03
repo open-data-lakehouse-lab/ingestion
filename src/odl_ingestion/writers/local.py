@@ -5,10 +5,11 @@ from typing import Any, Dict
 from .base import BaseWriter
 
 class LocalWriter(BaseWriter):
-    def write(self, payload: Dict[str, Any], dataset_id: str, output_dir: str) -> Path:
+    def write(self, payload: Dict[str, Any], dataset_id: str, output_dir: str, **kwargs: Any) -> Path:
         # For this MVP, we assume a specific structure for meteocat
         # In a real scenario, this would be more dynamic based on dataset metadata
         
+        filename = kwargs.get("filename", "sample.json")
         category = "weather"
         source = "meteocat"
         
@@ -21,7 +22,7 @@ class LocalWriter(BaseWriter):
             source / 
             dataset_id / 
             f"ingestion_date={ingestion_date}" / 
-            "sample.json"
+            filename
         )
         
         target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -29,4 +30,4 @@ class LocalWriter(BaseWriter):
         with open(target_path, "w") as f:
             json.dump(payload, f, indent=2)
             
-        return target_path
+        return Path(target_path)

@@ -8,7 +8,8 @@ The ingestion tool can be configured via command-line arguments or environment v
 
 - `CATALOG_PATH`: Path to the dataset catalog repository (default: `../datasets-catalog`).
 - `OUTPUT_DIR`: Directory where ingested data will be stored (default: `./data`).
-- `METEOCAT_API_KEY`: API key for the Meteocat connector (must NOT be committed).
+- `METEOCAT_API_KEY`: API key for the Meteocat connector (must NOT be committed). Required only for `real` mode.
+- `METEOCAT_BASE_URL`: Base URL for Meteocat API (default: `https://api.meteo.cat/xema/v1`).
 
 ## API Keys
 

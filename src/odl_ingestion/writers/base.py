@@ -4,6 +4,6 @@ from pathlib import Path
 
 class BaseWriter(ABC):
     @abstractmethod
-    def write(self, payload: Dict[str, Any], dataset_id: str, output_dir: str) -> Path:
+    def write(self, payload: Dict[str, Any], dataset_id: str, output_dir: str, **kwargs: Any) -> Path:
         """Write payload to the target storage."""
         pass

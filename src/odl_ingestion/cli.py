@@ -1,5 +1,7 @@
 import typer
+import os
 from pathlib import Path
+from typing import Optional
 from .catalog.loader import CatalogLoader
 from .connectors.weather.meteocat import MeteocatConnector
 from .writers.local import LocalWriter
@@ -52,9 +54,13 @@ def ingest(
     dataset: str = typer.Option(..., "--dataset", help="Dataset ID to ingest"),
     catalog_path: str = typer.Option("../datasets-catalog", "--catalog-path", help="Path to the dataset catalog repository"),
     target: str = typer.Option("local", "--target", help="Target writer type"),
-    output_dir: str = typer.Option("./data", "--output-dir", help="Output directory for local target")
+    output_dir: str = typer.Option("./data", "--output-dir", help="Output directory for local target"),
+    mode: str = typer.Option("sample", "--mode", help="Ingestion mode (sample or real)"),
+    meteocat_resource: str = typer.Option("stations-metadata", "--meteocat-resource", help="Meteocat resource to ingest"),
+    station_status: str = typer.Option("all", "--station-status", help="Filter by station status"),
+    metadata_date: Optional[str] = typer.Option(None, "--metadata-date", help="Metadata date (YYYY-MM-DD)")
 ) -> None:
-    """Run ingestion for a dataset (placeholder)."""
+    """Run ingestion for a dataset."""
     # Load catalog to verify dataset exists
     if not Path(catalog_path).exists():
         typer.echo(f"Error: Catalog path '{catalog_path}' does not exist.", err=True)
@@ -74,16 +80,42 @@ def ingest(
 
     if dataset == "meteocat-weather":
         connector = MeteocatConnector()
-        typer.echo(f"Extracting sample from {dataset}...")
-        sample_data = connector.extract_sample()
         
-        if not validate_record(sample_data):
+        if mode == "sample":
+            typer.echo(f"Extracting sample from {dataset}...")
+            data = connector.extract_sample()
+            filename = "sample.json"
+        elif mode == "real":
+            api_key = os.getenv("METEOCAT_API_KEY")
+            if not api_key:
+                typer.echo("Error: METEOCAT_API_KEY environment variable is required for real mode.", err=True)
+                raise typer.Exit(code=1)
+            
+            if meteocat_resource == "stations-metadata":
+                typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
+                data = connector.extract_station_metadata(
+                    api_key=api_key,
+                    station_status=station_status,
+                    metadata_date=metadata_date
+                )
+                filename = "stations-metadata.json"
+            else:
+                typer.echo(f"Error: Meteocat resource '{meteocat_resource}' is not supported.", err=True)
+                raise typer.Exit(code=1)
+        else:
+            typer.echo(f"Error: Mode '{mode}' is not supported.", err=True)
+            raise typer.Exit(code=1)
+        
+        # Validation is optional for now, but we keep it for sample
+        # For real data, we might want to be more flexible or have a different validator
+        if mode == "sample" and not validate_record(data):
              typer.echo("Error: Sample data validation failed.", err=True)
              raise typer.Exit(code=1)
 
         if target == "local":
             writer = LocalWriter()
-            output_path = writer.write(sample_data, dataset, output_dir)
+            # We need to update LocalWriter to accept filename or handle it better
+            output_path = writer.write(data, dataset, output_dir, filename=filename)
             typer.echo(f"Successfully ingested {dataset}.")
             typer.echo(f"Output written to: {output_path}")
         else:

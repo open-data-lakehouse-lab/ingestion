@@ -1,21 +1,16 @@
-from typing import Any, Dict
+import httpx
+from typing import Any, Dict, Optional
 from ..base import BaseConnector
+from ...config.settings import settings
 
 class MeteocatConnector(BaseConnector):
     """
-    Skeleton for Meteocat Weather API connector.
-    
-    TODO:
-    - API endpoint selection (e.g., current weather, forecasts).
-    - API Key handling through environment variables (METEOCAT_API_KEY).
-    - Pagination or date partitioning if needed.
-    - Error handling for API limits and network issues.
-    - Rate limit handling.
-    - Schema mapping to internal models.
+    Meteocat Weather API connector.
     """
 
     def __init__(self) -> None:
         super().__init__(dataset_id="meteocat-weather")
+        self.base_url = settings.meteocat_base_url
 
     def extract_sample(self) -> Dict[str, Any]:
         """
@@ -39,3 +34,26 @@ class MeteocatConnector(BaseConnector):
                 }
             ]
         }
+
+    def extract_station_metadata(
+        self,
+        api_key: str,
+        station_status: str = "all",
+        metadata_date: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Extract station metadata from Meteocat API.
+        """
+        url = f"{self.base_url}/estacions/metadades"
+        headers = {"x-api-key": api_key}
+        params = {}
+        if station_status and station_status != "all":
+            params["estat"] = station_status
+        if metadata_date:
+            params["data"] = metadata_date
+
+        with httpx.Client() as client:
+            response = client.get(url, headers=headers, params=params, timeout=10.0)
+            response.raise_for_status()
+            data: Dict[str, Any] = response.json()
+            return data
