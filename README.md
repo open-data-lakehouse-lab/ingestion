@@ -11,7 +11,7 @@ This repository is responsible for the ingestion layer of the Open Data Lakehous
 The current scope is focusing on the Weather Ingestion MVP.
 Selected MVP dataset: `meteocat-weather`.
 
-**Note:** The current implementation uses placeholder sample extraction. Real API ingestion will be implemented in future phases.
+**Note:** The default implementation uses safe placeholder sample extraction. Real Meteocat ingestion is available as an explicit opt-in mode for selected resources and requires METEOCAT_API_KEY.
 
 ## Installation
 

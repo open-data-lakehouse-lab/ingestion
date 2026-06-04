@@ -43,3 +43,6 @@ secrets/
 *.pem
 *.p12
 *.jks
+
+# Local tool state
+.cadence/
