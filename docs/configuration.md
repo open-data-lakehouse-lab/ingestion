@@ -25,4 +25,5 @@ The local writer uses a deterministic layout:
 
 - For `sample` mode: `sample.json`
 - For `stations-metadata` resource: `stations-metadata.json`
+- For `variables-metadata` resource: `variables-metadata.json`
 - For `measured-variable` resource: `measured-variable.json`

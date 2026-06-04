@@ -81,3 +81,19 @@ class MeteocatConnector(BaseConnector):
             response.raise_for_status()
             data: Dict[str, Any] = response.json()
             return data
+
+    def extract_variables_metadata(
+        self,
+        api_key: str,
+    ) -> Dict[str, Any]:
+        """
+        Extract variables metadata from Meteocat API.
+        """
+        url = f"{self.base_url}/variables/auxiliars/metadades"
+        headers = {"x-api-key": api_key}
+
+        with httpx.Client() as client:
+            response = client.get(url, headers=headers, timeout=10.0)
+            response.raise_for_status()
+            data: Dict[str, Any] = response.json()
+            return data

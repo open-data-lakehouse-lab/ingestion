@@ -50,6 +50,20 @@ def test_ingest_real_mode_missing_api_key(mock_catalog, tmp_path, monkeypatch):
     assert result.exit_code == 1
     assert "Error: METEOCAT_API_KEY environment variable is required for real mode." in result.output
 
+def test_ingest_real_mode_variables_metadata_missing_api_key(mock_catalog, tmp_path, monkeypatch):
+    monkeypatch.delenv("METEOCAT_API_KEY", raising=False)
+    output_dir = tmp_path / "output"
+    result = runner.invoke(app, [
+        "ingest",
+        "--dataset", "meteocat-weather",
+        "--catalog-path", str(mock_catalog),
+        "--output-dir", str(output_dir),
+        "--mode", "real",
+        "--meteocat-resource", "variables-metadata"
+    ])
+    assert result.exit_code == 1
+    assert "Error: METEOCAT_API_KEY environment variable is required for real mode." in result.output
+
 @respx.mock
 def test_ingest_real_mode_success(mock_catalog, tmp_path, monkeypatch):
     monkeypatch.setenv("METEOCAT_API_KEY", "test-api-key")
@@ -187,3 +201,41 @@ def test_connector_extract_measured_variable_with_station():
         
         assert mock_route.called
         assert mock_route.calls.last.request.url.params["codiEstacio"] == "D5"
+
+@respx.mock
+def test_ingest_real_mode_variables_metadata_success(mock_catalog, tmp_path, monkeypatch):
+    monkeypatch.setenv("METEOCAT_API_KEY", "test-api-key")
+    output_dir = tmp_path / "output"
+
+    # Mock Meteocat API
+    respx.get("https://api.meteo.cat/xema/v1/variables/auxiliars/metadades").mock(
+        return_value=httpx.Response(200, json={"variables": []})
+    )
+
+    result = runner.invoke(app, [
+        "ingest",
+        "--dataset", "meteocat-weather",
+        "--catalog-path", str(mock_catalog),
+        "--output-dir", str(output_dir),
+        "--mode", "real",
+        "--meteocat-resource", "variables-metadata"
+    ])
+
+    assert result.exit_code == 0
+    assert "Extracting variables-metadata from meteocat-weather (real mode)..." in result.output
+    assert any((output_dir / "landing").rglob("variables-metadata.json"))
+
+def test_connector_extract_variables_metadata_endpoint_and_headers():
+    connector = MeteocatConnector()
+
+    with respx.mock:
+        mock_route = respx.get("https://api.meteo.cat/xema/v1/variables/auxiliars/metadades").mock(
+            return_value=httpx.Response(200, json={"ok": True})
+        )
+
+        connector.extract_variables_metadata(
+            api_key="test-key"
+        )
+
+        assert mock_route.called
+        assert mock_route.calls.last.request.headers["x-api-key"] == "test-key"

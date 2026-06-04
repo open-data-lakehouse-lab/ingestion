@@ -72,6 +72,18 @@ odl-ingestion ingest \
   --meteocat-resource stations-metadata
 ```
 
+**Variables Metadata:**
+```bash
+export METEOCAT_API_KEY="replace-me"
+odl-ingestion ingest \
+  --dataset meteocat-weather \
+  --catalog-path ../datasets-catalog \
+  --target local \
+  --output-dir ./data \
+  --mode real \
+  --meteocat-resource variables-metadata
+```
+
 **Measured Variable:**
 ```bash
 export METEOCAT_API_KEY="replace-me"
@@ -90,10 +102,12 @@ odl-ingestion ingest \
 
 Options for real mode:
 - `--mode`: `sample` (default) or `real`.
-- `--meteocat-resource`: `stations-metadata` (default) or `measured-variable`.
+- `--meteocat-resource`: `stations-metadata` (default), `variables-metadata` or `measured-variable`.
 - For `stations-metadata`:
     - `--station-status`: Filter by station status (default: `all`).
     - `--metadata-date`: Filter by metadata date (YYYY-MM-DD).
+- For `variables-metadata`:
+    - No additional options required.
 - For `measured-variable`:
     - `--variable-code`: Variable code (required).
     - `--year`: Year (required).

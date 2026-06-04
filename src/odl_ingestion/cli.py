@@ -56,7 +56,7 @@ def ingest(
     target: str = typer.Option("local", "--target", help="Target writer type"),
     output_dir: str = typer.Option("./data", "--output-dir", help="Output directory for local target"),
     mode: str = typer.Option("sample", "--mode", help="Ingestion mode (sample or real)"),
-    meteocat_resource: str = typer.Option("stations-metadata", "--meteocat-resource", help="Meteocat resource to ingest"),
+    meteocat_resource: str = typer.Option("stations-metadata", "--meteocat-resource", help="Meteocat resource to ingest (stations-metadata, variables-metadata, measured-variable)"),
     station_status: str = typer.Option("all", "--station-status", help="Filter by station status"),
     metadata_date: Optional[str] = typer.Option(None, "--metadata-date", help="Metadata date (YYYY-MM-DD)"),
     variable_code: Optional[str] = typer.Option(None, "--variable-code", help="Variable code for measured data"),
@@ -104,6 +104,12 @@ def ingest(
                     metadata_date=metadata_date
                 )
                 filename = "stations-metadata.json"
+            elif meteocat_resource == "variables-metadata":
+                typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
+                data = connector.extract_variables_metadata(
+                    api_key=api_key
+                )
+                filename = "variables-metadata.json"
             elif meteocat_resource == "measured-variable":
                 if not all([variable_code, year, month, day]):
                     typer.echo("Error: --variable-code, --year, --month and --day are required for measured-variable resource.", err=True)
