@@ -34,6 +34,17 @@ The system supports real-world ingestion through opt-in modes. Implemented real-
 
 Real mode requires a valid `METEOCAT_API_KEY`.
 
+### Meteocat Real-mode Hardening
+
+The Meteocat connector implementation for real mode includes:
+
+- **Configurable timeout and retries** via environment variables.
+- **Explicit HTTP status handling** with connector-specific errors.
+- **Retry support for transient failures** (HTTP 429, 5xx, and timeouts).
+- **Safe error messages** that prevent leaking API keys in logs or CLI output.
+- **Invalid JSON handling** to catch unexpected API responses.
+- **Mocked HTTP testing** to ensure reliability without requiring network access.
+
 ## Future Evolution
 
 - Implementation of cloud-like writers (e.g., S3-compatible storage).

@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 from .catalog.loader import CatalogLoader
 from .connectors.weather.meteocat import MeteocatConnector
+from .connectors.errors import ConnectorError
 from .writers.local import LocalWriter
 from .validation.records import validate_record
 
@@ -86,56 +87,60 @@ def ingest(
     if dataset == "meteocat-weather":
         connector = MeteocatConnector()
         
-        if mode == "sample":
-            typer.echo(f"Extracting sample from {dataset}...")
-            data = connector.extract_sample()
-            filename = "sample.json"
-        elif mode == "real":
-            api_key = os.getenv("METEOCAT_API_KEY")
-            if not api_key:
-                typer.echo("Error: METEOCAT_API_KEY environment variable is required for real mode.", err=True)
-                raise typer.Exit(code=1)
-            
-            if meteocat_resource == "stations-metadata":
-                typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
-                data = connector.extract_station_metadata(
-                    api_key=api_key,
-                    station_status=station_status,
-                    metadata_date=metadata_date
-                )
-                filename = "stations-metadata.json"
-            elif meteocat_resource == "variables-metadata":
-                typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
-                data = connector.extract_variables_metadata(
-                    api_key=api_key
-                )
-                filename = "variables-metadata.json"
-            elif meteocat_resource == "measured-variable":
-                if not all([variable_code, year, month, day]):
-                    typer.echo("Error: --variable-code, --year, --month and --day are required for measured-variable resource.", err=True)
+        try:
+            if mode == "sample":
+                typer.echo(f"Extracting sample from {dataset}...")
+                data = connector.extract_sample()
+                filename = "sample.json"
+            elif mode == "real":
+                api_key = os.getenv("METEOCAT_API_KEY")
+                if not api_key:
+                    typer.echo("Error: METEOCAT_API_KEY environment variable is required for real mode.", err=True)
                     raise typer.Exit(code=1)
                 
-                typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
-                # We know they are not None because of the check above, but for type checker:
-                assert variable_code is not None
-                assert year is not None
-                assert month is not None
-                assert day is not None
+                if meteocat_resource == "stations-metadata":
+                    typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
+                    data = connector.extract_station_metadata(
+                        api_key=api_key,
+                        station_status=station_status,
+                        metadata_date=metadata_date
+                    )
+                    filename = "stations-metadata.json"
+                elif meteocat_resource == "variables-metadata":
+                    typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
+                    data = connector.extract_variables_metadata(
+                        api_key=api_key
+                    )
+                    filename = "variables-metadata.json"
+                elif meteocat_resource == "measured-variable":
+                    if not all([variable_code, year, month, day]):
+                        typer.echo("Error: --variable-code, --year, --month and --day are required for measured-variable resource.", err=True)
+                        raise typer.Exit(code=1)
+                    
+                    typer.echo(f"Extracting {meteocat_resource} from {dataset} (real mode)...")
+                    # We know they are not None because of the check above, but for type checker:
+                    assert variable_code is not None
+                    assert year is not None
+                    assert month is not None
+                    assert day is not None
 
-                data = connector.extract_measured_variable(
-                    api_key=api_key,
-                    variable_code=variable_code,
-                    year=year,
-                    month=month,
-                    day=day,
-                    station_code=station_code
-                )
-                filename = "measured-variable.json"
+                    data = connector.extract_measured_variable(
+                        api_key=api_key,
+                        variable_code=variable_code,
+                        year=year,
+                        month=month,
+                        day=day,
+                        station_code=station_code
+                    )
+                    filename = "measured-variable.json"
+                else:
+                    typer.echo(f"Error: Meteocat resource '{meteocat_resource}' is not supported.", err=True)
+                    raise typer.Exit(code=1)
             else:
-                typer.echo(f"Error: Meteocat resource '{meteocat_resource}' is not supported.", err=True)
+                typer.echo(f"Error: Mode '{mode}' is not supported.", err=True)
                 raise typer.Exit(code=1)
-        else:
-            typer.echo(f"Error: Mode '{mode}' is not supported.", err=True)
+        except ConnectorError as e:
+            typer.echo(f"Error: {e}", err=True)
             raise typer.Exit(code=1)
         
         # Validation is optional for now, but we keep it for sample

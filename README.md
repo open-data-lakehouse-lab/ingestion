@@ -115,6 +115,19 @@ Options for real mode:
     - `--day`: Day (required).
     - `--station-code`: Station code (optional).
 
+### Real-mode Hardening
+
+The Meteocat connector in `real` mode includes hardening for production-like usage:
+
+- **Configurable Timeout**: Set via `METEOCAT_TIMEOUT_SECONDS` (default: 10.0s).
+- **Configurable Retries**: Set via `METEOCAT_MAX_RETRIES` (default: 2).
+- **Transient Failure Retries**: Automatically retries on:
+    - HTTP 429 (Too Many Requests)
+    - HTTP 500, 502, 503, 504 (Server Errors)
+    - Connection timeouts
+- **Safe Error Handling**: Provides clear messages for HTTP errors and invalid JSON without exposing API keys.
+- **Mocked Testing**: All tests use mocked HTTP responses and do not require real network or API keys.
+
 **Note:** The default mode is `sample`. Real mode is opt-in and requires a valid API key.
 
 ## Validation and Testing

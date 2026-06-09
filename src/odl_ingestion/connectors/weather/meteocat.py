@@ -1,6 +1,13 @@
 import httpx
+import json
+import time
 from typing import Any, Dict, Optional
 from ..base import BaseConnector
+from ..errors import (
+    ConnectorHttpError,
+    ConnectorInvalidResponseError,
+    ConnectorTimeoutError,
+)
 from ...config.settings import settings
 
 class MeteocatConnector(BaseConnector):
@@ -11,6 +18,53 @@ class MeteocatConnector(BaseConnector):
     def __init__(self) -> None:
         super().__init__(dataset_id="meteocat-weather")
         self.base_url = settings.meteocat_base_url
+        self.timeout = settings.meteocat_timeout_seconds
+        self.max_retries = settings.meteocat_max_retries
+
+    def _get_json(
+        self, url: str, headers: Dict[str, str], params: Optional[Dict[str, Any]] = None
+    ) -> Any:
+        """
+        Helper to perform GET requests with retries, timeouts and error handling.
+        """
+        retries = 0
+        while True:
+            try:
+                with httpx.Client() as client:
+                    response = client.get(
+                        url, headers=headers, params=params, timeout=self.timeout
+                    )
+
+                    if response.status_code == 200:
+                        try:
+                            return response.json()
+                        except json.JSONDecodeError as e:
+                            raise ConnectorInvalidResponseError(
+                                f"Invalid JSON response from Meteocat API: {e}"
+                            ) from e
+
+                    # Check for transient errors
+                    transient_status_codes = [429, 500, 502, 503, 504]
+                    if response.status_code in transient_status_codes:
+                        if retries < self.max_retries:
+                            retries += 1
+                            # Minimal sleep for retries
+                            time.sleep(0.1)
+                            continue
+
+                    # Non-transient or exhausted retries
+                    raise ConnectorHttpError(
+                        f"Meteocat API returned HTTP {response.status_code} for URL: {url}"
+                    )
+
+            except httpx.TimeoutException as e:
+                if retries < self.max_retries:
+                    retries += 1
+                    time.sleep(0.1)
+                    continue
+                raise ConnectorTimeoutError(f"Meteocat API request timed out: {e}") from e
+            except httpx.RequestError as e:
+                raise ConnectorHttpError(f"Error connecting to Meteocat API: {e}") from e
 
     def extract_sample(self) -> Dict[str, Any]:
         """
@@ -52,11 +106,8 @@ class MeteocatConnector(BaseConnector):
         if metadata_date:
             params["data"] = metadata_date
 
-        with httpx.Client() as client:
-            response = client.get(url, headers=headers, params=params, timeout=10.0)
-            response.raise_for_status()
-            data: Dict[str, Any] = response.json()
-            return data
+        data: Dict[str, Any] = self._get_json(url, headers=headers, params=params)
+        return data
 
     def extract_measured_variable(
         self,
@@ -76,11 +127,8 @@ class MeteocatConnector(BaseConnector):
         if station_code:
             params["codiEstacio"] = station_code
 
-        with httpx.Client() as client:
-            response = client.get(url, headers=headers, params=params, timeout=10.0)
-            response.raise_for_status()
-            data: Dict[str, Any] = response.json()
-            return data
+        data: Dict[str, Any] = self._get_json(url, headers=headers, params=params)
+        return data
 
     def extract_variables_metadata(
         self,
@@ -92,8 +140,5 @@ class MeteocatConnector(BaseConnector):
         url = f"{self.base_url}/variables/auxiliars/metadades"
         headers = {"x-api-key": api_key}
 
-        with httpx.Client() as client:
-            response = client.get(url, headers=headers, timeout=10.0)
-            response.raise_for_status()
-            data: Dict[str, Any] = response.json()
-            return data
+        data: Dict[str, Any] = self._get_json(url, headers=headers)
+        return data

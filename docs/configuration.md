@@ -10,6 +10,8 @@ The ingestion tool can be configured via command-line arguments or environment v
 - `OUTPUT_DIR`: Directory where ingested data will be stored (default: `./data`).
 - `METEOCAT_API_KEY`: API key for the Meteocat connector (must NOT be committed). Required only for `real` mode.
 - `METEOCAT_BASE_URL`: Base URL for Meteocat API (default: `https://api.meteo.cat/xema/v1`).
+- `METEOCAT_TIMEOUT_SECONDS`: Timeout for Meteocat API requests in seconds (default: `10.0`).
+- `METEOCAT_MAX_RETRIES`: Maximum number of retries for transient failures (default: `2`).
 
 ## API Keys
 

@@ -16,7 +16,10 @@ The Meteocat connector supports both a safe offline `sample` mode and real opt-i
     - Station metadata supports optional date filtering. ✓
     - Variable metadata provides all available variable definitions. ✓
     - Measured variable data supports variable code and date (YYYY/MM/DD). ✓
-5. **Error Handling**: Uses `response.raise_for_status()` for clear HTTP errors. ✓
+5. **Error Handling**: Uses explicit HTTP status handling with connector-specific errors. ✓
+    - Configurable timeout and retries for transient failures (429, 500, 502, 503, 504). ✓
+    - Clear handling for invalid JSON and connection errors. ✓
+    - Safe error messages that do not expose API keys. ✓
 6. **Schema Mapping**: Currently returns raw JSON; future mapping to standardized internal format is planned.
 
 ## Verification
